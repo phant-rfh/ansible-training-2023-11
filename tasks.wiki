@@ -1,0 +1,12 @@
+
+
+- get hostname of server
+- get datetime of server
+- app servers:
+    - install and enable firewall [policy allow], allow ssh and HTTP in, nothing else
+    - install python3, pip3, and django4:
+        - you'll probably have to update_cache
+- db server:
+    - install and enable firewall [policy allow], allow ssh in, allow 3306 in only for the local /24
+    - install mariadb
+    - create user (remember `login_unix_socket=/var/run/mysqld/mysqld.sock`)

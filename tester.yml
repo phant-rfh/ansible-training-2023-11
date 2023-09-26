@@ -1,0 +1,12 @@
+---
+- name: long command with ">"
+  cmd: >
+    first line
+    second line
+    third line
+
+- name: long command with "|"
+  cmd: |
+    first line
+    second line
+    third line

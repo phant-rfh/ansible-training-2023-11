@@ -1,0 +1,15 @@
+[local]
+127.0.0.1 ansible_user=rolf
+
+[remote]
+172.23.1.4
+172.23.1.6
+
+# ':children' says, that what follows are group names, please resolve them
+[multi:children]
+local
+remote
+
+[multi:vars]
+ansible_user = root
+ansible_private_key = ~/.ssh/id_ed25519
