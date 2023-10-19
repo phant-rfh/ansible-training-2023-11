@@ -1,2 +1,5 @@
 # ignore vagrant things
 .vagrant
+
+# python cache files
+*.pyc
