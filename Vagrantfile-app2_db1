@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     app.vm.network :private_network, ip: "192.168.56.5"
   end
   # DB Server
-  config.vm.define "db" do |db|
+  config.vm.define "db1" do |db|
     db.vm.hostname = "orc-db.test"
     db.vm.network :private_network, ip: "192.168.56.6"
   end
