@@ -1,0 +1,26 @@
+---
+- name: Configure Proxy
+  hosts: proxy
+  become: true
+  vars:
+    app_servers: "{{ groups.app }}"
+  handlers:
+    - import_tasks: handlers/main.yml
+  tasks:
+    - name: Deploy config
+      ansible.builtin.template:
+        src: proxy_nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: www-data
+        mode: 0640
+        validate: >
+          bash -c 'NGINX_TMP_DIR=`mktemp -d`;
+                   cp -rTp /etc/nginx $NGINX_TMP_DIR &&
+                   cp -Tp %s "$NGINX_TMP_DIR"/sites-enabled/default &&
+                   nginx -t -c "$NGINX_TMP_DIR"/nginx.conf
+                   #&& rm -r "$NGINX_TMP_DIR"'
+      notify: Reload Nginx
+    - name: Ensure nginx is actually running
+      ansible.builtin.service:
+        name: nginx
+        state: started

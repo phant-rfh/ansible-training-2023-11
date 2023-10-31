@@ -1,0 +1,68 @@
+---
+- name: Deploy new version of app
+  hosts: app
+  become: true
+  serial: 1
+  vars:
+    app_version: v1
+  handlers:
+    - import_tasks: handlers/main.yml
+
+  tasks:
+    - name: Remove current host from load-balancer rotation
+      ansible.builtin.template:
+        src: proxy_nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: www-data
+        mode: 0640
+        validate: >
+          bash -c 'NGINX_TMP_DIR=`mktemp -d`;
+                   cp -rTp /etc/nginx $NGINX_TMP_DIR &&
+                   cp -Tp %s "$NGINX_TMP_DIR"/sites-enabled/default &&
+                   nginx -t -c "$NGINX_TMP_DIR"/nginx.conf
+                   #&& rm -r "$NGINX_TMP_DIR"'
+      vars:
+        app_servers: "{{ groups.app | difference([inventory_hostname]) }}"
+      delegate_to: "{{ groups.proxy.0 }}"
+    - name: Reload load-balancer config
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      delegate_to: "{{ groups.proxy.0 }}"
+    - name: Ensure we have time to observe the one server out of rotation
+      ansible.builtin.wait_for:
+        timeout: 10
+    - name: Deploy new app
+      ansible.builtin.template:
+        src: app_index.html_{{ app_version }}.j2
+        dest: /var/www/html/index.html
+        owner: www-data
+        mode: 0644
+        backup: true
+    - name: Ensure current server is back online
+      ansible.builtin.wait_for:
+        delay: 5
+        host: "{{ inventory_hostname }}"
+        port: 80
+        state: started
+        timeout: 30
+    - name: Put current host back into the load-balancer rotation
+      ansible.builtin.template:
+        src: proxy_nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: www-data
+        mode: 0640
+        validate: >
+          bash -c 'NGINX_TMP_DIR=`mktemp -d`;
+                   cp -rTp /etc/nginx $NGINX_TMP_DIR &&
+                   cp -Tp %s "$NGINX_TMP_DIR"/sites-enabled/default &&
+                   nginx -t -c "$NGINX_TMP_DIR"/nginx.conf
+                   #&& rm -r "$NGINX_TMP_DIR"'
+      vars:
+        app_servers: "{{ groups.app }}"
+      delegate_to: "{{ groups.proxy.0 }}"
+    - name: Reload load-balancer config
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      delegate_to: "{{ groups.proxy.0 }}"

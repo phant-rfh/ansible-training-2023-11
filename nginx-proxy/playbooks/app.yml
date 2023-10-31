@@ -1,0 +1,36 @@
+---
+- name: Deploy the base index to hosts
+  become: true
+  hosts: app
+  vars:
+    app_version: v1
+
+  handlers:
+    - import_tasks: handlers/main.yml
+
+  tasks:
+    - name: Template out base nginx config
+      ansible.builtin.template:
+        src: app_nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: www-data
+        mode: 0644
+        backup: true
+        validate: >
+          bash -c 'NGINX_TMP_DIR=`mktemp -d`;
+                   cp -rTp /etc/nginx $NGINX_TMP_DIR &&
+                   cp -Tp %s "$NGINX_TMP_DIR"/sites-enabled/default &&
+                   nginx -t -c "$NGINX_TMP_DIR"/nginx.conf &&
+                   rm -r "$NGINX_TMP_DIR"'
+      notify: Reload Nginx
+    - name: Template out the HTML
+      ansible.builtin.template:
+        src: app_index.html_{{ app_version }}.j2
+        dest: /var/www/html/index.html
+        owner: www-data
+        mode: 0644
+        backup: true
+    - name: Ensure nginx is actually running
+      ansible.builtin.service:
+        name: nginx
+        state: started

@@ -1,0 +1,25 @@
+---
+- name: Base play for all hosts
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update all
+      apt:
+        autoclean: true
+        autoremove: true
+        cache_valid_time: 3600
+        update_cache: true
+        upgrade: true
+    - name: Set authorized_keys
+      copy:
+        src: authorized_keys
+        dest: ~/.ssh/authorized_keys
+        backup: true
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+    - name: Ensure nginx starts at boot
+      service:
+        name: nginx
+        enabled: true
