@@ -1,0 +1,5 @@
+192.168.57.9
+
+[all:vars]
+ansible_user = vagrant
+ansible_ssh_private_key = ~/.vagrant.d/insecure_private_key

@@ -1,0 +1,17 @@
+---
+- name: provision wordpress
+  hosts: all
+  tasks:
+    - name: Ensure apache2 is installed
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+        name:
+          - apache2
+        state: present
+      become: true
+    - name: Ensure apache2 is started and enabled
+      service:
+        name: apache2
+        state: started
+        enabled: true
