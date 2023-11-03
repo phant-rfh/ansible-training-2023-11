@@ -45,4 +45,7 @@ deploy: bundle ## deploy to shrimp
 clean: ## remove symlink and archive
 --- rm -f Vagrantfile all.tgz
 
-.PHONY: help 0 1 2 up down destroy clean
+untar: ## extract the archive
+--- tar -xvf all.tgz
+
+.PHONY: help 0 1 2 up down destroy bundle deploy clean untar
