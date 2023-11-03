@@ -1,0 +1,5 @@
+# ignore the symlink
+Vagrantfile
+
+# ignore the archive
+all.tgz
