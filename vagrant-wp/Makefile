@@ -27,9 +27,6 @@ help: ## print what targets we've got
 2:  ## Link Vagrantfile-2
 --- ln -sf Vagrantfile-2 Vagrantfile
 
-all: ## do all the things
---- @echo start every line with ---
-
 up: ## bring vagrant up
 --- vagrant up
 
@@ -39,7 +36,13 @@ down: ## bring vagrant down
 destroy: ## destroy
 --- vagrant destroy -f
 
-deploy: ## deploy to shrimp
---- rsync -tva ./Makefile ./Vagrantfile-* ./wp-provision* shrimp.vpn:/var/www/html/ansible/
+bundle: Makefile Vagrantfile-* wp-provision* ## compress all the files into a .tgz
+--- tar -czf all.tgz $^
 
-.PHONY: all help 0 1 2 up down destroy
+deploy: bundle ## deploy to shrimp
+--- rsync -tva --delete ./Makefile ./Vagrantfile-* ./wp-provision* ./all.tgz shrimp.vpn:/var/www/html/ansible/
+
+clean: ## remove symlink and archive
+--- rm -f Vagrantfile all.tgz
+
+.PHONY: help 0 1 2 up down destroy clean
