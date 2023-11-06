@@ -48,4 +48,7 @@ clean: ## remove symlink and archive
 untar: ## extract the archive
 --- tar -xvf all.tgz
 
-.PHONY: help 0 1 2 up down destroy bundle deploy clean untar
+get: ## get archive
+--- wget https://hlmn.net/ansible/all.tgz -O all.tgz
+
+.PHONY: help 0 1 2 up down destroy bundle deploy clean untar get
